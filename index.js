@@ -45,6 +45,7 @@ app.get('/api/notes/:id', (request, response) => {
     })
 
     app.post('/api/notes', (request, response) => {
+        console.log(request.body)
         const note = request.body
         console.log(note)
         response.json(note)
