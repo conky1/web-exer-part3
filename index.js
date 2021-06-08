@@ -3,7 +3,6 @@ const app = express()
 
 app.use(express.json())
 
-
 let notes = [
     {
       id: 1,
@@ -44,12 +43,13 @@ app.get('/api/notes/:id', (request, response) => {
       }
     })
 
-    app.post('/api/notes', (request, response) => {
-        console.log(request.body)
-        const note = request.body
-        console.log(note)
-        response.json(note)
-      })
+  app.post('/api/notes', (request, response) => {
+      console.log(request.body)
+      const note = request.body
+      console.log(note)
+
+      response.json(note)
+    })
 
     app.delete('/api/notes/:id', (request, response) => {
     const id = Number(request.params.id)
