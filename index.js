@@ -1,7 +1,8 @@
 const express = require('express')
 const app = express()
-
 app.use(express.json())
+const cors = require('cors')
+app.use(cors())
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -37,14 +38,20 @@ let persons = [
 ]
 
 app.get('/', (req, res) => {
-  res.send('<h1>Hello Outer World!</h1>')
+  res.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/notes', (req, res) => {
-  res.json(notes)
+app.get('/info', (req, res) => {
+  const dateTime = new Date();
+  res.send(`<h1>Phonebook has info for ${persons.length} people</ <br/> <br/>${dateTime}`)
+    })
+
+
+app.get('/api/persons', (req, res) => {
+  res.json(persons)
 })
 
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     const person = persons.find(person => person.id === id)
 
@@ -56,36 +63,50 @@ app.get('/api/notes/:id', (request, response) => {
     })
 
     const generateId = () => {
-      const maxId = notes.length > 0
-        ? Math.max(...notes.map(n => n.id))
+      const maxId = persons.length > 0
+        ? Math.max(...persons.map(n => n.id))
         : 0
       return maxId + 1
     }
     
-    app.post('/api/notes', (request, response) => {
+    app.post('/api/persons', (request, response) => {
       const body = request.body
     
-      if (!body.content) {
+      if (!body.name) {
         return response.status(400).json({ 
-          error: 'content missing' 
+          error: 'name missing' 
         })
       }
+
+      if (!body.number) {
+        return response.status(400).json({ 
+          error: 'number missing' 
+        })
+      }
+
+      if(persons.find(p => p.name.toLowerCase()=== body.name.toLowerCase())) {
+        return response.status(400).json({ 
+          error: 'name must be unique' 
+        })
+      }
+
+      
     
-      const note = {
-        content: body.content,
-        important: body.important || false,
-        date: new Date(),
+      const person = {
+        name: body.name,
+        number: body.number,
+        //date: new Date(),
         id: generateId(),
       }
     
-      notes = notes.concat(note)
+      persons = persons.concat(person)
     
-      response.json(note)
+      response.json(person)
     })
 
-    app.delete('/api/notes/:id', (request, response) => {
+    app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
+    persons = persons.filter(person => person.id !== id)
     
     response.status(204).end()
     })
@@ -96,7 +117,7 @@ app.get('/api/notes/:id', (request, response) => {
     
     app.use(unknownEndpoint)
 
-const PORT = 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+    const PORT = process.env.PORT || 3001
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`)
+    })
